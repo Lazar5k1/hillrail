@@ -3,7 +3,7 @@
 #include <string.h>
 
 int main(int argc, char* argv[]){
-    if(argc < 3){
+    if(argc < 5){
         printf("reenter command");
         return 1;
     }
@@ -11,6 +11,7 @@ int main(int argc, char* argv[]){
         printf("need encrypt argument");
         return 1;
     }
+    printf("Your depth is: %s  :O oh my gahhh!!\n", argv[3]);
 
     FILE *key;
     FILE *plaintext;
