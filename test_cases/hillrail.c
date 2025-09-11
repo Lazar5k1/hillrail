@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void processPlaintext(FILE *plaintext, char **plainContent, char **processContent);
+void processKey(FILE *key, int **keyArray, char **chunk, int *keyLength);
+void processPlaintext(FILE *plaintext, char **plainContent, char **message);
+void hill(int block, int *keyArray, char *message, char **hillText);
 
 int main(int argc, char* argv[]){
     if(argc < 5){
@@ -13,13 +15,43 @@ int main(int argc, char* argv[]){
         printf("need encrypt argument");
         return 1;
     }
-        
-    printf("Your depth is: %s\n", argv[4]);
-
 
     FILE *key = fopen(argv[2], "r");
     FILE *plaintext = fopen(argv[3], "r");
+    
+    int *keyArray;
+    char *chunk;
+    int keyLength = 0;
+    processKey(key, &keyArray, &chunk, &keyLength);
+    char *plainContent;
+    char *message;
+    processPlaintext(plaintext, &plainContent, &message);
+// process text files
 
+    int block = *chunk - '0';
+    char *hillText;
+    hill(block, keyArray, message, &hillText);
+
+    printf("block = %c\n", *chunk);
+    for(int i = 0; i < keyLength; i++){
+        printf("%d", keyArray[i]);
+    }
+    printf("\n************************************\n\n");
+    printf("%s\n", plainContent);
+    printf("************************************\n\n");
+    printf("%s", message);
+    
+    free(keyContent);
+    free(keyArray);
+    free(plainContent);
+    free(message);
+    fclose(key);
+    fclose(plaintext);
+
+    return 0;
+}
+
+void processKey(FILE *key, int **keyArray, char **chunk, int *keyLength){
     fseek(key, 0, SEEK_END);
     long keySize = ftell(key);
     rewind(key);
@@ -29,27 +61,28 @@ int main(int argc, char* argv[]){
     fread(keyContent, 1, keySize, key);
     keyContent[keySize] = '\0';
 // allocates file's amount of memory to fileContent for accurate storage, reads 1 byte at a time starting at &key and ending at byte fileSize into fileContent
-    
-    char *plainContent = NULL;
-    char *processContent = NULL;
-    processPlaintext(plaintext, &plainContent, &processContent);
 
-    printf("%s\n\n", keyContent);
-    printf("************************************\n\n");
-    printf("%s\n\n", plainContent);
-    printf("************************************\n\n");
-    printf("%s", processContent);
+    **chunk = keyContent[0];
+    keyContent[0] = ' ';
+    char *end;
+    long num;
+    int i = 0;
+// *************************************************************************************************************************************************************** work here <----
+    while(*keyContent != '\0'){
+        num = strtol(keyContent, &end, 10);
+        if(keyContent == end){
+            keyContent++;
+        }
+        else{
+            (*keyArray)[*keyLength] = (int)num;
+            keyContent = end;
+        }
+        *keyLength++;
+    }
     
-    free(keyContent);
-    free(plainContent);
-    free(processContent);
-    fclose(key);
-    fclose(plaintext);
-
-    return 0;
 }
 
-void processPlaintext(FILE *plaintext, char **plainContent, char **processContent){
+void processPlaintext(FILE *plaintext, char **plainContent, char **message){
     fseek(plaintext, 0, SEEK_END);
     long plainSize = ftell(plaintext);
     rewind(plaintext);
@@ -57,23 +90,28 @@ void processPlaintext(FILE *plaintext, char **plainContent, char **processConten
 
     *plainContent = malloc(plainSize + 1);
     fread(*plainContent, 1, plainSize, plaintext);
-    *plainContent[plainSize] = '\0';
+    (*plainContent)[plainSize] = '\0';
 // allocates file's amount of memory to fileContent for accurate storage, reads 1 byte at a time starting at bytefileSize of file and ending at byte 0 into fileContent
 // then appending fileSize with \0 to make it a valid string
-
     
-    *processContent = malloc(plainSize +1);
-    strcpy(*processContent, *plainContent);
-
+    *message = malloc(plainSize +1);
+    strcpy(*message, *plainContent);
+    
     int j = 0;
-    for(int i = 0; i < (plainSize +1); i++){
-        if(*processContent[i] >= 'a' && *processContent[i] <= 'z'){
-            *processContent[i] -= 32;
+    for(int i = 0; i < (plainSize + 1); i++){
+        if((*message)[i] >= 'a' && (*message)[i] <= 'z'){
+            (*message)[i] -= 32;
         }
-        if(*processContent[i] >= 'A' && *processContent[i] <= 'Z'){
-            *processContent[j++] = *processContent[i];
+        if((*message)[i] >= 'A' && (*message)[i] <= 'Z'){
+            (*message)[j++] = (*message)[i];
         }
     }
-    *processContent[j] = '\0';
+    (*message)[j] = '\0';
 // capitalizes all a-z characters and deletes everything else
+}
+
+void hill(int block, int *keyArray, char *message, char **hillText){
+    for(block; block > 0; block--){
+
+    }
 }
