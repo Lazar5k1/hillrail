@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void processKey(FILE *key, int **keyArray, char **chunk, int *keyLength);
+void processKey(FILE *key, int **keyArray, int *block, int *keyLength);
 void processPlaintext(FILE *plaintext, char **plainContent, char **message);
 void hill(int block, int *keyArray, char *message, char **hillText);
 
@@ -19,29 +19,37 @@ int main(int argc, char* argv[]){
     FILE *key = fopen(argv[2], "r");
     FILE *plaintext = fopen(argv[3], "r");
     
-    int *keyArray;
-    char *chunk;
+    int *keyArray = NULL;
+    int block;
     int keyLength = 0;
-    processKey(key, &keyArray, &chunk, &keyLength);
+    processKey(key, &keyArray, &block, &keyLength);
     char *plainContent;
     char *message;
     processPlaintext(plaintext, &plainContent, &message);
 // process text files
 
-    int block = *chunk - '0';
     char *hillText;
     hill(block, keyArray, message, &hillText);
 
-    printf("block = %c\n", *chunk);
-    for(int i = 0; i < keyLength; i++){
-        printf("%d", keyArray[i]);
+    printf("Key matrix:\n");
+    for(int i = 0; i < keyLength; i ++){
+        if((i + 1) % block != 0){
+        printf("%d\t", keyArray[i]);
+        }
+        else{
+        printf("%d\n", keyArray[i]);
+        }
     }
-    printf("\n************************************\n\n");
-    printf("%s\n", plainContent);
-    printf("************************************\n\n");
-    printf("%s", message);
+    printf("\nPlaintext:\n");
+    for(int i = 0; i < strlen(message); i ++){
+        if((i + 1) % 80 != 0){
+        printf("%c", message[i]);
+        }
+        else{
+        printf("%c\n", message[i]);
+        }
+    }
     
-    free(keyContent);
     free(keyArray);
     free(plainContent);
     free(message);
@@ -51,7 +59,7 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void processKey(FILE *key, int **keyArray, char **chunk, int *keyLength){
+void processKey(FILE *key, int **keyArray, int *block, int *keyLength){
     fseek(key, 0, SEEK_END);
     long keySize = ftell(key);
     rewind(key);
@@ -62,24 +70,23 @@ void processKey(FILE *key, int **keyArray, char **chunk, int *keyLength){
     keyContent[keySize] = '\0';
 // allocates file's amount of memory to fileContent for accurate storage, reads 1 byte at a time starting at &key and ending at byte fileSize into fileContent
 
-    **chunk = keyContent[0];
+    *block = keyContent[0] - '0';
     keyContent[0] = ' ';
     char *end;
     long num;
     int i = 0;
-// *************************************************************************************************************************************************************** work here <----
     while(*keyContent != '\0'){
         num = strtol(keyContent, &end, 10);
         if(keyContent == end){
             keyContent++;
         }
         else{
+            *keyArray = realloc(*keyArray, (*keyLength + 1) * sizeof(int));
             (*keyArray)[*keyLength] = (int)num;
             keyContent = end;
+            (*keyLength)++;
         }
-        *keyLength++;
     }
-    
 }
 
 void processPlaintext(FILE *plaintext, char **plainContent, char **message){
