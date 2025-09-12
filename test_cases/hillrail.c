@@ -5,6 +5,7 @@
 void processKey(FILE *key, int **keyArray, int *block, int *keyLength);
 void processPlaintext(FILE *plaintext, char **message);
 void hill(char *message, int **hillText, int *keyArray, int *cipherLength, int block);
+void railfence(int *hillText, int **cipherText, int depth, int cipherLength);
 
 int main(int argc, char* argv[]){
     if(argc < 5){
@@ -37,7 +38,9 @@ int main(int argc, char* argv[]){
     hill(message, &hillText, keyArray, &cipherLength, block);
 // encrypts message with the hill cipher and returns as an int array
 
-    
+    int *cipherText;
+    int depth = (int)((*argv[4]) - '0');
+    railfence(hillText, &cipherText, depth, cipherLength);
 
     printf("Key matrix:\n");
     for(int i = 0; i < keyLength; i ++){
@@ -53,19 +56,26 @@ int main(int argc, char* argv[]){
         if((i + 1) % 80 != 0){
         printf("%c", message[i]);
         }
+        else if(i == strlen(message)){
+        printf("%c", message[i]);
+        }
         else{
-        printf("%c\n", message[i]);
+            printf("%c\n", message[i]);
         }
     }
-    printf("\nCipher text:\n");
+    printf("\n\nCiphertext:\n");
     for(int i = 0; i < cipherLength; i++){
         if((i + 1) % 80 != 0){
-        printf("%c", (char)(hillText[i] + 65));
+        printf("%c", (char)(cipherText[i] + 65));
+        }
+        else if(i == cipherLength){
+        printf("%c", (char)(cipherText[i] + 65));
         }
         else{
-        printf("%c\n", (char)(hillText[i] + 65));
+        printf("%c\n", (char)(cipherText[i] + 65));
         }
     }
+    printf("\n\nDepth: %d\n", depth);
 // print output with correct format
     
     free(keyArray);
@@ -180,4 +190,35 @@ void hill(char *message, int **hillText, int *keyArray, int *cipherLength, int b
     }
 // encrypts message with the hill cipher and stores it in hillText
     free(hillNum);
+}
+
+void railfence(int *hillText, int **cipherText, int depth, int cipherLength){
+    *cipherText = malloc(cipherLength * sizeof(int));
+    if(depth == 1){
+        for(int i = 0; i < cipherLength; i++){
+            (*cipherText)[i] = hillText[i];
+        }
+    }
+    else if(depth == 2){
+        int count = 0;
+        for(int i = 0, j = 0; j < cipherLength; i++, j += 2){
+            (*cipherText)[i] = hillText[j];
+            count++;
+        }
+        for(int i = 0, j = 0; j < cipherLength; i++, j += 2){
+            (*cipherText)[count+i] = hillText[j+1];
+        }
+    }
+    else if(depth == 3){
+        int i = 0;
+        for(int j = 0; j < cipherLength; j += 4){
+            (*cipherText)[i++] = hillText[j];
+        }
+        for(int j = 1; j < cipherLength; j += 2){
+            (*cipherText)[i++] = hillText[j];
+        }
+        for(int j = 2; j < cipherLength; j += 4){
+            (*cipherText)[i++] = hillText[j];
+        }
+    }
 }
