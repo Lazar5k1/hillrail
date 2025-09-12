@@ -41,6 +41,8 @@ int main(int argc, char* argv[]){
     int *cipherText;
     int depth = (int)((*argv[4]) - '0');
     railfence(hillText, &cipherText, depth, cipherLength);
+// I don't know all the logic behind hillrail and the test cases only go to 3 so instead of making a nice scalable function for every depth we're getting some deishevled hieroglyphics that I threw at the compiler until it worked 3 different times
+// railfence encrypts hillText even further using the railfence cipher
 
     printf("Key matrix:\n");
     for(int i = 0; i < keyLength; i ++){
@@ -194,11 +196,13 @@ void hill(char *message, int **hillText, int *keyArray, int *cipherLength, int b
 
 void railfence(int *hillText, int **cipherText, int depth, int cipherLength){
     *cipherText = malloc(cipherLength * sizeof(int));
+// allocates memory for cipherText to copy over hillText
     if(depth == 1){
         for(int i = 0; i < cipherLength; i++){
             (*cipherText)[i] = hillText[i];
         }
     }
+// depth 0 is just the same text so it just gets transferred over
     else if(depth == 2){
         int count = 0;
         for(int i = 0, j = 0; j < cipherLength; i++, j += 2){
@@ -209,6 +213,7 @@ void railfence(int *hillText, int **cipherText, int depth, int cipherLength){
             (*cipherText)[count+i] = hillText[j+1];
         }
     }
+// depth 2 actually does some transposition but caveman style
     else if(depth == 3){
         int i = 0;
         for(int j = 0; j < cipherLength; j += 4){
@@ -221,4 +226,5 @@ void railfence(int *hillText, int **cipherText, int depth, int cipherLength){
             (*cipherText)[i++] = hillText[j];
         }
     }
+// depth 3 is the same thing as depth 2 but a little different. I think if I spent a while longer I could find out the patterns below but I've been hearing voices since day 2 coding this
 }
