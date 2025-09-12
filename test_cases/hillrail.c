@@ -1,3 +1,26 @@
+/*
+Assignment :
+hillrail - Hill cipher followed by Rail Fence transposition
+Author : Nicholas Gill
+Language : C , C ++ , or Rust ( only )
+To Compile :
+gcc - O2 - std = c11 -o hillrail hillrail . c
+g ++ - O2 - std = c ++17 -o hillrail hillrail . cpp
+rustc -O hillrail . rs -o hillrail
+To Execute ( on Eustis ):
+./ hillrail encrypt key . txt plain . txt < depth >
+where :
+key . txt = key matrix file
+plain . txt = plaintext file
+< depth > = integer >= 2 ( Rail Fence )
+Notes :
+- Input is 8 - bit ASCII ; process only A - Z ( uppercase ).
+- Tested on Eustis .
+Class : CIS3360 - Security in Computing - Fall 2025
+Instructor : Dr . Jie Lin
+Due Date : September 12 th 2025
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +31,7 @@ void hill(char *message, int **hillText, int *keyArray, int *cipherLength, int b
 void railfence(int *hillText, int **cipherText, int depth, int cipherLength);
 
 int main(int argc, char* argv[]){
-    if(argc < 5){
+    if(argc != 5){
         printf("reenter command");
         return 1;
     }
@@ -55,10 +78,10 @@ int main(int argc, char* argv[]){
     }
     printf("\nPlaintext:\n");
     for(int i = 0; i < strlen(message); i ++){
-        if((i + 1) % 80 != 0){
+        if(i == strlen(message) - 1){
         printf("%c", message[i]);
         }
-        else if(i == strlen(message)){
+        else if((i + 1) % 80 != 0){
         printf("%c", message[i]);
         }
         else{
@@ -67,10 +90,10 @@ int main(int argc, char* argv[]){
     }
     printf("\n\nCiphertext:\n");
     for(int i = 0; i < cipherLength; i++){
-        if((i + 1) % 80 != 0){
+        if(i == cipherLength - 1){
         printf("%c", (char)(cipherText[i] + 65));
         }
-        else if(i == cipherLength){
+        else if((i + 1) % 80 != 0){
         printf("%c", (char)(cipherText[i] + 65));
         }
         else{
